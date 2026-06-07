@@ -1,188 +1,189 @@
-import PrimaryButton from "@/Components/Core/PrimaryButton";
+import InputError from "@/Components/Core/InputError";
+import Modal from "@/Components/Core/Modal";
 import { useForm, usePage } from "@inertiajs/react";
 import React, { FormEventHandler, useState } from "react";
-import SecondaryButton from "@/Components/Core/SecondaryButton";
-import Modal from "@/Components/Core/Modal";
-import InputLabel from "@/Components/Core/InputLabel";
-import TextInput from "@/Components/Core/TextInput";
-import InputError from "@/Components/Core/InputError";
+import { Store, CheckCircle } from "lucide-react";
 
 function VendorDetails({ className = "" }: { className?: string }) {
-  const [showBecomeVendorConfirmation, setShowBecomeVendorConfirmation] =
-    useState(false);
+  const [showBecomeVendorConfirmation, setShowBecomeVendorConfirmation] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const user = usePage().props.auth.user;
   const token = usePage().props.csrf_token;
 
   const { data, setData, errors, post, processing, recentlySuccessful } =
     useForm({
-      store_name:
-        user.vendor?.store_name || user.name.toLowerCase().replace(/\s+/g, "-"),
+      store_name: user.vendor?.store_name || user.name.toLowerCase().replace(/\s+/g, "-"),
       store_address: user.vendor?.store_address || "",
     });
 
-  // store_name change
-  const onStoreNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setData(
-      "store_name",
-      event.target.value.toLowerCase().replace(/\s+/g, "-")
-    );
+  const onStoreNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setData("store_name", e.target.value.toLowerCase().replace(/\s+/g, "-"));
   };
 
-  //  become vendor submit details when vbecome vendor button clicks
-  const becomeVendor: FormEventHandler = (event) => {
-    event.preventDefault();
-
+  const becomeVendor: FormEventHandler = (e) => {
+    e.preventDefault();
     post(route("vendor.store"), {
       preserveScroll: true,
       onSuccess: () => {
         closeModal();
         setSuccessMessage("You can now create and publish products.");
       },
-      onError: () => {},
     });
   };
 
-  // vendor details updates
-  const updateVendor: FormEventHandler = (event) => {
-    event.preventDefault();
-
+  const updateVendor: FormEventHandler = (e) => {
+    e.preventDefault();
     post(route("vendor.store"), {
       preserveScroll: true,
       onSuccess: () => {
-        closeModal();
         setSuccessMessage("Your details were updated.");
       },
-      onError: () => {},
     });
   };
 
-  const closeModal = () => {
-    setShowBecomeVendorConfirmation(false);
+  const closeModal = () => setShowBecomeVendorConfirmation(false);
+
+  const statusStyles: Record<string, string> = {
+    pending: "border-gray-400 dark:border-gray-500 text-gray-600 dark:text-gray-400",
+    rejected: "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black",
+    approved: "border-black dark:border-white text-black dark:text-white",
   };
 
   return (
     <section className={className}>
-      {recentlySuccessful && (
-        <div className="toast toast-top toast-end z-[1000]">
-          <div className="alert alert-success text-white">
-            <span>{successMessage}</span>
-          </div>
+
+      {/* Success message */}
+      {recentlySuccessful && successMessage && (
+        <div className="mb-6 border border-black dark:border-white bg-black dark:bg-white px-4 py-3 text-xs font-bold uppercase tracking-widest text-white dark:text-black">
+          {successMessage}
         </div>
       )}
 
-      <header>
-        <h2 className="flex justify-between mb-8 text-lg font-medium text-gray-900 dark:text-gray-100">
-          Vendor Details
-          {/* look up objects - it maps the key value pais - it reduces the if switch statements */}
-          {user.vendor?.status && (
-            <span
-              className={`badge text-white ${
-                {
-                  pending: "badge-warning",
-                  rejected: "badge-error",
-                  approved: "badge-success",
-                }[user.vendor.status] || ""
-              }`}
+      {/* Vendor status badge */}
+      {user.vendor?.status && (
+        <div className="mb-6 flex items-center gap-3">
+          <Store className="h-4 w-4 text-black dark:text-white" />
+          <span className={`border px-3 py-1 text-xs font-bold uppercase tracking-widest ${statusStyles[user.vendor.status] || "border-black dark:border-white text-black dark:text-white"}`}>
+            {user.vendor.status_label}
+          </span>
+        </div>
+      )}
+
+      {/* Become vendor button */}
+      {!user.vendor && (
+        <button
+          type="button"
+          onClick={() => setShowBecomeVendorConfirmation(true)}
+          disabled={processing}
+          className="w-full border border-black dark:border-white bg-black dark:bg-white px-6 py-3 text-xs font-bold uppercase tracking-widest text-white dark:text-black transition-all duration-200 hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white disabled:opacity-50"
+        >
+          Become a Vendor
+        </button>
+      )}
+
+      {/* Vendor form */}
+      {user.vendor && (
+        <>
+          <form onSubmit={updateVendor} className="space-y-4">
+            <div>
+              <label
+                htmlFor="store_name"
+                className="mb-2 block text-xs font-bold uppercase tracking-widest text-black dark:text-white"
+              >
+                Store Name
+              </label>
+              <input
+                id="store_name"
+                type="text"
+                value={data.store_name}
+                onChange={onStoreNameChange}
+                required
+                autoComplete="store_name"
+                className="w-full bg-white dark:bg-gray-950 border border-black dark:border-gray-600 px-4 py-3 text-sm text-black dark:text-white outline-none focus:ring-0 placeholder-gray-400 dark:placeholder-gray-600"
+              />
+              <InputError className="mt-2" message={errors.store_name} />
+            </div>
+
+            <div>
+              <label
+                htmlFor="store_address"
+                className="mb-2 block text-xs font-bold uppercase tracking-widest text-black dark:text-white"
+              >
+                Store Address
+              </label>
+              <textarea
+                id="store_address"
+                value={data.store_address}
+                onChange={(e) => setData("store_address", e.target.value)}
+                rows={3}
+                placeholder="Enter your store address"
+                className="w-full bg-white dark:bg-gray-950 border border-black dark:border-gray-600 px-4 py-3 text-sm text-black dark:text-white outline-none focus:ring-0 placeholder-gray-400 dark:placeholder-gray-600 resize-none"
+              />
+              <InputError className="mt-2" message={errors.store_address} />
+            </div>
+
+            <button
+              type="submit"
+              disabled={processing}
+              className="w-full border border-black dark:border-white bg-black dark:bg-white px-6 py-3 text-xs font-bold uppercase tracking-widest text-white dark:text-black transition-all duration-200 hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white disabled:opacity-50"
             >
-              {user.vendor.status_label}
-            </span>
-          )}
-        </h2>
-      </header>
+              {processing ? "Saving..." : "Update Store"}
+            </button>
+          </form>
 
-      <div>
-        {!user.vendor && (
-          <PrimaryButton
-            onClick={(event) => setShowBecomeVendorConfirmation(true)}
-            disabled={processing}
-          >
-            Become a Vendor
-          </PrimaryButton>
-        )}
-
-        {user.vendor && (
-          <>
-            {/* update vendor details - form */}
-            <form onSubmit={updateVendor}>
-              <div className="mb-4">
-                <InputLabel htmlFor="name" value="Store Name" />
-
-                <TextInput
-                  id="store_name"
-                  value={data.store_name}
-                  onChange={onStoreNameChange}
-                  required
-                  isFocused
-                  autoComplete="store_name"
-                  className="mt-1 block w-full"
-                />
-
-                <InputError className="mt-2" message={errors.store_name} />
+          {/* Stripe connect */}
+          <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8">
+            {user.stripe_account_active && (
+              <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black dark:text-white">
+                <CheckCircle className="h-4 w-4" />
+                Connected to Stripe
               </div>
+            )}
 
-              <div className="mb-4">
-                <InputLabel htmlFor="name" value="Store Address" />
-
-                <textarea
-                  value={data.store_address}
-                  onChange={(event) =>
-                    setData("store_address", event.target.value)
-                  }
-                  className="textarea textarea-bordered w-full mt-1 focus:border-violet-900 focus:ring-1 focus:ring-violet-900 dark:focus:border-indigo-600 dark:focus:ring-1 dark:focus:ring-indigo-600 focus:outline-none transition-all duration-200 ease-in-out"
-                  placeholder="Enter Your Store Address"
-                ></textarea>
-
-                <InputError className="mt-2" message={errors.store_address} />
-              </div>
-
-              <div className="flex items-center gap-4">
-                <PrimaryButton disabled={processing}>Update</PrimaryButton>
-              </div>
-            </form>
-
-            {/* connect to stripe - stripe connect */}
-            <form
-              action={route("stripe.connect")}
-              method="post"
-              className="my-8"
-            >
+            <form action={route("stripe.connect")} method="post">
               <input type="hidden" name="_token" value={token} />
-
-              {user.stripe_account_active && (
-                <div className="text-center text-gray-600 my-4 text-sm">
-                  Yor are successfully connected to Stripe
-                </div>
-              )}
-
-              <div className="w-full">
-                <PrimaryButton
-                  className="w-full justify-center"
-                  disabled={user.stripe_account_active}
-                >
-                  Connect to Stripe
-                </PrimaryButton>
-              </div>
+              <button
+                type="submit"
+                disabled={user.stripe_account_active}
+                className="w-full border border-black dark:border-gray-600 px-6 py-3 text-xs font-bold uppercase tracking-widest text-black dark:text-white transition-all duration-200 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {user.stripe_account_active ? "Stripe Connected" : "Connect to Stripe"}
+              </button>
             </form>
-          </>
-        )}
-      </div>
-
-      <Modal show={showBecomeVendorConfirmation} onClose={closeModal}>
-        <form onSubmit={becomeVendor} className="p-8">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-            Are you sure you want to become a Vendor?
-          </h2>
-
-          <div className="mt-6 flex justify-end space-x-3">
-            <SecondaryButton onClick={closeModal} className="normal-case">
-              Cancel
-            </SecondaryButton>
-            <PrimaryButton disabled={processing} className="normal-case">
-              Confirm
-            </PrimaryButton>
           </div>
-        </form>
+        </>
+      )}
+
+      {/* Become vendor modal */}
+      <Modal show={showBecomeVendorConfirmation} onClose={closeModal}>
+        <div className="p-8">
+          <h2 className="mb-2 text-xl font-black uppercase tracking-tighter text-black dark:text-white">
+            Become a Vendor
+          </h2>
+          <p className="mb-8 text-sm text-gray-500 dark:text-gray-400">
+            Are you sure you want to become a vendor? You'll be able to create
+            and publish products on the marketplace.
+          </p>
+
+          <form onSubmit={becomeVendor}>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="border border-black dark:border-gray-600 px-6 py-2 text-xs font-bold uppercase tracking-widest text-black dark:text-white transition-all duration-200 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={processing}
+                className="border border-black dark:border-white bg-black dark:bg-white px-6 py-2 text-xs font-bold uppercase tracking-widest text-white dark:text-black transition-all duration-200 hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white disabled:opacity-50"
+              >
+                {processing ? "Processing..." : "Confirm"}
+              </button>
+            </div>
+          </form>
+        </div>
       </Modal>
     </section>
   );

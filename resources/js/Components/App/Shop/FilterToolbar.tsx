@@ -1,4 +1,3 @@
-import React from "react";
 import ActiveFilters from "./ActiveFilters";
 import SortDropdown from "./SortDropdown";
 
@@ -12,15 +11,10 @@ interface FilterToolbarProps {
 }
 
 export default function FilterToolbar({
-  isFiltering,
-  selectedCategory,
-  filters,
-  onClearCategory,
-  selectedSort,
-  onSortChange,
+  isFiltering, selectedCategory, filters, onClearCategory, selectedSort, onSortChange,
 }: FilterToolbarProps) {
   return (
-    <div className="flex justify-between items-center mb-4 bg-white p-3 rounded shadow">
+    <div className="flex justify-between items-center mb-4 border border-black dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
       <ActiveFilters
         isFiltering={isFiltering}
         selectedCategory={selectedCategory}

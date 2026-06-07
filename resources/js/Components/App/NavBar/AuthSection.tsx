@@ -1,59 +1,81 @@
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Link } from "@inertiajs/react";
-import ResponsiveNavLink from "@/Components/Core/ResponsiveNavLink";
+import { User, Settings, LogOut, ChevronDown } from "lucide-react";
 
 type AuthSectionProps = {
   user: any;
 };
 
 export default function AuthSection({ user }: AuthSectionProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   if (user) {
     return (
-      <div className="dropdown dropdown-end">
-        <div tabIndex={0} className="btn btn-ghost btn-circle avatar">
-          <div className="w-8 rounded-full ring ring-purple-600 ring-offset-1">
-            <img
-              alt="User avatar"
-              src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-            />
-          </div>
-        </div>
-        <ul
-          tabIndex={0}
-          className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow"
+      <div className="relative" ref={ref}>
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-2 border border-black px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-black transition-all duration-200 hover:bg-black hover:text-white"
         >
-          <li>
-            <ResponsiveNavLink
+          <User className="h-3.5 w-3.5" />
+          {user.name}
+          <ChevronDown className="h-3 w-3" />
+        </button>
+
+        {open && (
+          <div className="absolute right-0 top-full z-50 mt-1 w-48 border border-black bg-white">
+            <Link
               href={route("profile.edit")}
-              className="justify-between"
+              prefetch
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-wide text-black transition-all duration-200 hover:bg-black hover:text-white"
             >
+              <Settings className="h-3.5 w-3.5" />
               Profile
-            </ResponsiveNavLink>
-          </li>
-          <li>
-            <ResponsiveNavLink href="">Settings</ResponsiveNavLink>
-          </li>
-          <li>
-            <ResponsiveNavLink method="post" href={route("logout")} as="button">
+            </Link>
+
+            <div className="border-t border-gray-100" />
+
+            <Link
+              href={route("logout")}
+              method="post"
+              as="button"
+              onClick={() => setOpen(false)}
+              className="flex w-full items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-wide text-black transition-all duration-200 hover:bg-black hover:text-white"
+            >
+              <LogOut className="h-3.5 w-3.5" />
               Log Out
-            </ResponsiveNavLink>
-          </li>
-        </ul>
+            </Link>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="hidden lg:flex lg:items-center lg:space-x-3">
+    <div className="hidden lg:flex lg:items-center lg:gap-2">
       <Link
         href={route("login")}
-        className="btn btn-ghost btn-sm rounded-lg hover:bg-purple-700 hover:text-white"
+        prefetch
+        className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-black border border-black transition-all duration-200 hover:bg-black hover:text-white"
       >
         Log in
       </Link>
       <Link
         href={route("register")}
-        className="text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-md"
+        prefetch
+        className="px-4 py-2 text-xs font-bold uppercase tracking-widest bg-black text-white border border-black transition-all duration-200 hover:bg-white hover:text-black"
       >
         Register
       </Link>

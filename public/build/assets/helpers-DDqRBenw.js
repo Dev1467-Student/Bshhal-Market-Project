@@ -1,0 +1,1 @@
+const n=(t,e)=>t.length!==e.length?!1:t.every((r,o)=>r===e[o]),s=t=>{const e=new URLSearchParams;return Object.entries(t.option_ids).forEach(([r,o])=>{e.append(`options[${r}]`,o+"")}),route("product.show",t.slug)+"?"+e.toString()};export{s as P,n as a};

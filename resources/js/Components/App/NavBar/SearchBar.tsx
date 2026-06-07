@@ -1,40 +1,40 @@
 import React, { FormEventHandler } from "react";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { Search } from "lucide-react";
 import { usePage, useForm } from "@inertiajs/react";
 import { PageProps } from "@/types";
 
 export default function SearchBar() {
-  const { keyword } = usePage().props;
+  const { keyword, url } = usePage<PageProps>().props;
 
   const searchForm = useForm<{ keyword: string }>({
     keyword: keyword || "",
   });
 
-  const { url } = usePage();
+  const { url: currentUrl } = usePage();
 
   const onSubmit: FormEventHandler = (event) => {
     event.preventDefault();
-    searchForm.get(url, {
+    searchForm.get(currentUrl, {
       preserveScroll: true,
       preserveState: true,
     });
   };
 
   return (
-    <div className="hidden lg:block max-w-md w-full">
+    <div className="hidden lg:block w-64">
       <form onSubmit={onSubmit} className="flex">
         <input
           type="text"
           value={searchForm.data.keyword}
           onChange={(e) => searchForm.setData("keyword", e.target.value)}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:ring-purple-500 focus:border-purple-500 text-sm"
+          className="flex-1 bg-white border border-black border-r-0 px-4 py-2 text-sm text-black outline-none focus:ring-0 rounded-none placeholder-gray-400"
           placeholder="Search products..."
         />
         <button
           type="submit"
-          className="px-3 py-2 bg-purple-600 text-white border border-l-0 border-purple-600 rounded-r-md hover:bg-purple-700 text-sm"
+          className="border border-black bg-black px-3 py-2 text-white transition-all duration-200 hover:bg-white hover:text-black"
         >
-          <MagnifyingGlassIcon className="h-4 w-4" />
+          <Search className="h-4 w-4" />
         </button>
       </form>
     </div>

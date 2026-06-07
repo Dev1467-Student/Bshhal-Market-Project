@@ -88,21 +88,40 @@ class CartController extends Controller
         $vendorId = $request->input('vendor_id');
 
         $allCartItems = $this->cartService->getCartItemsGrouped();
+        Log::info('Checkout initiated', [
+            'user_id' => $request->user()->id,
+            'vendor_id' => $vendorId,
+            'all_cart_items' => $allCartItems
+        ]);
 
         DB::beginTransaction();
 
         try {
-            $checkoutCartItems = $vendorId ? $allCartItems[$vendorId] : $allCartItems;
+            if ($vendorId) {
+                if (!isset($allCartItems[$vendorId])) {
+                    throw new Exception('Invalid vendor ID');
+                }
+                // If vendorId is provided, create an array with just that vendor
+                $checkoutCartItems = [
+                    $allCartItems[$vendorId]
+                ];
+            } else {
+                $checkoutCartItems = array_values($allCartItems);
+            }
+
+            Log::info('Checkout cart items prepared', ['checkout_items' => $checkoutCartItems]);
 
             // Use OrderService to create orders and Stripe session
             $result = $this->orderService->createOrdersAndStripeSession($request->user(), $checkoutCartItems, $vendorId);
 
+            Log::info('Stripe session created', ['session_id' => $result['session']->id, 'session_url' => $result['session']->url]);
+
             DB::commit();
             return redirect($result['session']->url);
         } catch (Exception $e) {
-            Log::error($e);
+            Log::error('Checkout failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             DB::rollBack();
-            return back()->with('error', $e->getMessage() ?: 'Something went wrong');
+            return back()->with('error', $e->getMessage() ?: 'Something went wrong. Please check the logs.');
         }
     }
 }

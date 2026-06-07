@@ -10,7 +10,7 @@ type RightSectionProps = {
 
 export default function RightSection({ user }: RightSectionProps) {
   return (
-    <div className="flex items-center space-x-3">
+    <div className="flex items-center space-x-2">
       <SearchBar />
       <MobileSearch />
       <MiniCartDropDown />

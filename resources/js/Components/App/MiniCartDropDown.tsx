@@ -1,94 +1,123 @@
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
+import { ShoppingBag, X } from "lucide-react";
 import CurrencyFormatter from "../Core/CurrencyFormatter";
 import { ProductRoute } from "@/helpers";
 
 function MiniCartDropDown() {
   const { totalQuantity, totalPrice, miniCartItems } = usePage().props;
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   return (
-    <div>
-      {/* Cart dropdown */}
-      <div className="dropdown dropdown-end mr-5">
-        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
-          <div className="indicator">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
-            <span className="badge badge-sm indicator-item bg-purple-800 text-white">
-              {totalQuantity}
+    <div className="relative" ref={ref}>
+      {/* Cart button */}
+      <button
+        onClick={() => setOpen(!open)}
+        className="relative border border-black p-1.5 text-black transition-all duration-200 hover:bg-black hover:text-white"
+        aria-label="Cart"
+      >
+        <ShoppingBag className="h-4 w-4" />
+        {totalQuantity > 0 && (
+          <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center bg-black text-white text-[10px] font-bold">
+            {totalQuantity}
+          </span>
+        )}
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-1 w-96 border border-black bg-white">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-black px-4 py-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-black">
+              Cart ({totalQuantity})
             </span>
+            <button
+              onClick={() => setOpen(false)}
+              className="text-black hover:text-gray-600"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-        </div>
-        <div
-          tabIndex={0}
-          className="card card-compact dropdown-content bg-base-100 z-[1] mt-3 w-[480px] shadow"
-        >
-          <div className="card-body">
-            <span className="text-lg font-bold">{totalQuantity} Items</span>
 
-            <div className="my-1 max-h-[300px] overflow-auto">
-              {miniCartItems.length === 0 && (
-                <div className={"py-2 text-gray-500 text-center"}>
-                  You don't have any items yet.
-                </div>
-              )}
-
-              {miniCartItems.map((item) => (
+          {/* Items */}
+          <div className="max-h-72 overflow-y-auto">
+            {miniCartItems.length === 0 ? (
+              <div className="py-12 text-center">
+                <ShoppingBag className="mx-auto mb-3 h-8 w-8 text-gray-300" />
+                <p className="text-xs text-gray-400">Your cart is empty</p>
+              </div>
+            ) : (
+              miniCartItems.map((item) => (
                 <div
                   key={item.id}
-                  className="flex gap-3 p-3 border-b items-start"
+                  className="flex gap-3 border-b border-gray-100 p-3 last:border-0"
                 >
-                  <Link href={ProductRoute(item)}>
+                  <Link
+                    href={ProductRoute(item)}
+                    onClick={() => setOpen(false)}
+                    className="shrink-0"
+                  >
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="w-16 h-16 object-contain rounded"
+                      className="h-14 w-14 border border-gray-100 object-contain"
                     />
                   </Link>
 
-                  <div className="flex flex-col flex-1">
-                    <h3 className="font-semibold text-sm mb-1">
-                      <Link href={ProductRoute(item)}>
-                        {item.title}
-                      </Link>
-                    </h3>
-                    <div className="flex justify-between text-xs text-gray-600">
-                      <span>Quantity: {item.quantity}</span>
-                      <span>
-                        <CurrencyFormatter
-                          amount={item.quantity * item.price}
-                        />
+                  <div className="flex flex-1 flex-col gap-1">
+                    <Link
+                      href={ProductRoute(item)}
+                      onClick={() => setOpen(false)}
+                      className="text-xs font-medium text-black hover:underline line-clamp-2"
+                    >
+                      {item.title}
+                    </Link>
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>Qty: {item.quantity}</span>
+                      <span className="font-semibold text-black">
+                        <CurrencyFormatter amount={item.quantity * item.price} />
                       </span>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-            <span className="text-lg font-semibold">
-              Subtotal: <CurrencyFormatter amount={totalPrice} />
-            </span>
-            <div className="card-actions">
+              ))
+            )}
+          </div>
+
+          {/* Footer */}
+          {miniCartItems.length > 0 && (
+            <div className="border-t border-black p-4">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-widest text-black">
+                  Subtotal
+                </span>
+                <span className="text-sm font-bold text-black">
+                  <CurrencyFormatter amount={totalPrice} />
+                </span>
+              </div>
               <Link
                 href={route("cart.index")}
-                className="btn bg-purple-800 text-white hover:bg-purple-700 btn-block"
+                onClick={() => setOpen(false)}
+                className="block w-full bg-black px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-white hover:text-black border border-black"
               >
-                View cart
+                View Cart
               </Link>
             </div>
-          </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

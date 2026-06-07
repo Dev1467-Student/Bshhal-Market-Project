@@ -16,11 +16,11 @@ export default function NavBar() {
 
   return (
     <>
-      <div className="shadow-sm border-b border-gray-200 bg-white sticky top-0 z-50">
-        <div className="container mx-auto px-4">
+      <div className="border-b border-black bg-white sticky top-0 z-50">
+        <div className="mx-auto px-4 md:px-8 lg:px-16">
           <div className="flex items-center justify-between h-16 relative">
             {/* Left Section */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 flex-shrink-0">
               <MobileMenu
                 isMenuOpen={isMenuOpen}
                 toggleMenu={() => setIsMenuOpen(!isMenuOpen)}
@@ -34,7 +34,9 @@ export default function NavBar() {
             <DesktopNavLinks />
 
             {/* Right Section */}
-            <RightSection user={user} />
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <RightSection user={user} />
+            </div>
           </div>
         </div>
       </div>

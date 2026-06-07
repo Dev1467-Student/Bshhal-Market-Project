@@ -16,6 +16,29 @@
     /* Firefox */
 }
 
+/* Inertia Progress Bar Styles for light and dark mode */
+#nprogress .bar {
+    background: #000000 !important;
+}
+#nprogress .peg {
+    box-shadow: 0 0 10px #000000, 0 0 5px #000000 !important;
+}
+#nprogress .spinner-icon {
+    border-top-color: #000000 !important;
+    border-left-color: #000000 !important;
+}
+
+.dark #nprogress .bar {
+    background: #ffffff !important;
+}
+.dark #nprogress .peg {
+    box-shadow: 0 0 10px #ffffff, 0 0 5px #ffffff !important;
+}
+.dark #nprogress .spinner-icon {
+    border-top-color: #ffffff !important;
+    border-left-color: #ffffff !important;
+}
+
 .ck-content-output>blockquote,
 .ck-content-output>dl,
 .ck-content-output>dd,

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from "@inertiajs/react";
+import { Menu, X } from "lucide-react";
 
 type MobileMenuProps = {
   isMenuOpen: boolean;
@@ -30,89 +31,73 @@ export default function MobileMenu({
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen, closeMenu]);
+
+  const links = [
+    { name: "Home", href: route("dashboard") },
+    { name: "Shop", href: route("shop") },
+    { name: "About", href: route("about") },
+    { name: "Contact", href: route("contact") },
+  ];
 
   return (
     <>
+      {/* Hamburger button */}
       <button
         ref={buttonRef}
         onClick={toggleMenu}
-        className="lg:hidden text-gray-600 hover:text-gray-900"
+        className="lg:hidden border border-black p-1.5 text-black transition-all duration-200 hover:bg-black hover:text-white"
         aria-label="Toggle menu"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 6h16M4 12h16M4 18h16"
-          />
-        </svg>
+        {isMenuOpen
+          ? <X className="h-5 w-5" />
+          : <Menu className="h-5 w-5" />
+        }
       </button>
 
+      {/* Dropdown menu */}
       {isMenuOpen && (
         <ul
           ref={menuRef}
-          className="absolute top-16 left-0 z-40 w-52 bg-white border rounded-md shadow-lg p-2 space-y-2"
+          className="absolute top-16 left-0 z-40 w-56 border border-black bg-white"
         >
-          <li>
-            <Link
-              href={route("dashboard")}
-              className="block px-3 py-1 text-sm hover:text-purple-600"
-            >
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={route("shop")}
-              className="block px-3 py-1 text-sm hover:text-purple-600"
-            >
-              Shop
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/about"
-              className="block px-3 py-1 text-sm hover:text-purple-600"
-            >
-              About
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/contact"
-              className="block px-3 py-1 text-sm hover:text-purple-600"
-            >
-              Contact
-            </Link>
-          </li>
-
-          {!user && (
-            <li className="flex flex-col space-y-2 border-t border-gray-200 pt-2">
+          {links.map(({ name, href }) => (
+            <li key={name} className="border-b border-gray-100 last:border-0">
               <Link
-                href={route("login")}
-                className="btn btn-ghost btn-sm rounded-lg hover:bg-purple-700 hover:text-white"
+                href={href}
+                prefetch
+                onClick={closeMenu}
+                className="block px-6 py-3 text-xs font-bold uppercase tracking-widest text-black transition-all duration-200 hover:bg-black hover:text-white"
               >
-                Log in
-              </Link>
-              <Link
-                href={route("register")}
-                className="text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-md"
-              >
-                Register
+                {name}
               </Link>
             </li>
+          ))}
+
+          {!user && (
+            <>
+              <li className="border-t border-black">
+                <Link
+                  href={route("login")}
+                  prefetch
+                  onClick={closeMenu}
+                  className="block px-6 py-3 text-xs font-bold uppercase tracking-widest text-black transition-all duration-200 hover:bg-black hover:text-white"
+                >
+                  Log In
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={route("register")}
+                  prefetch
+                  onClick={closeMenu}
+                  className="block bg-black px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-white hover:text-black"
+                >
+                  Register
+                </Link>
+              </li>
+            </>
           )}
         </ul>
       )}

@@ -10,17 +10,22 @@ use App\Models\Category;
 use App\Models\Department;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ProductController extends Controller
 {
+    private function productWithRelations()
+    {
+        return Product::query()
+            ->forWebsite()
+            ->with(['category', 'department', 'user', 'media']);
+    }
+
     public function home(Request $request)
     {
         $keyword = $request->query('keyword');
 
-        $products = Product::query()
-            ->forWebsite()
+        $products = $this->productWithRelations()
             ->searchKeyword($keyword)
             ->paginate(12);
 
@@ -31,15 +36,12 @@ class ProductController extends Controller
 
     public function shop(Request $request)
     {
-        // Initialize the query
-        $query = Product::query()->forWebsite();
+        $query = $this->productWithRelations();
 
-        // Category filter
         if ($request->filled('category')) {
             $query->where('category_id', $request->category);
         }
 
-        // Price range filter
         if ($request->filled('price_min')) {
             $query->where('price', '>=', $request->price_min);
         }
@@ -48,26 +50,22 @@ class ProductController extends Controller
             $query->where('price', '<=', $request->price_max);
         }
 
-        // Sorting
         if ($request->sort === 'price_asc') {
             $query->orderBy('price');
         } elseif ($request->sort === 'price_desc') {
             $query->orderByDesc('price');
         } elseif ($request->sort === 'latest') {
-            $query->latest();
+            $query->latest('products.created_at');
         }
 
-        $keyword = $request->query('keyword');
-
-        // Paginate products
-        $products = $query->searchKeyword($keyword)
+        $products = $query
+            ->searchKeyword($request->query('keyword'))
             ->paginate(12)
             ->withQueryString();
 
-        // Fetch categories with product count
         $categories = Category::select('id', 'name')
-            ->withCount('products')  // Counts the number of products in each category
-            ->has('products')        // Filters categories that have products
+            ->withCount('products')
+            ->has('products')
             ->get();
 
         return Inertia::render('Product/Shop', [
@@ -80,9 +78,19 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
+        $product->load(['category', 'department', 'user', 'media', 
+                        'variationTypes.options.media']);
+
+        $relatedProducts = $this->productWithRelations()
+            ->where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->take(8)
+            ->get();
+
         return Inertia::render('Product/Show', [
-            'product' => new ProductResource($product),
-            'variationOptions' => request('options', [])
+            'product'          => new ProductResource($product),
+            'relatedProducts'  => ProductListResource::collection($relatedProducts),
+            'variationOptions' => request('options', []),
         ]);
     }
 
@@ -90,17 +98,14 @@ class ProductController extends Controller
     {
         abort_unless($department->active, 404);
 
-        $keyword = $request->query('keyword');
-
-        $products = Product::query()
-            ->forWebsite()
+        $products = $this->productWithRelations()
             ->where('department_id', $department->id)
-            ->searchKeyword($keyword)
+            ->searchKeyword($request->query('keyword'))
             ->paginate();
 
         return Inertia::render('Department/Index', [
             'department' => new DepartmentResource($department),
-            'products' => PaginatedResource::format($products, ProductListResource::class),
+            'products'   => PaginatedResource::format($products, ProductListResource::class),
         ]);
     }
 }

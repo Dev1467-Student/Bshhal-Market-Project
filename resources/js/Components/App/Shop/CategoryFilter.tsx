@@ -1,6 +1,3 @@
-import React from "react";
-import { FaTimes } from "react-icons/fa";
-
 interface CategoryFilterProps {
   categories: any[];
   selectedCategory: string | null;
@@ -18,48 +15,46 @@ export default function CategoryFilter({
 
   return (
     <div className="mb-6">
-
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-md font-semibold">Categories</h2>
-
+        <h2 className="text-xs font-bold uppercase tracking-widest text-black dark:text-white">
+          Categories
+        </h2>
         {categories?.length > 5 && (
           <button
             onClick={() => setShowCategoryModal(true)}
-            className="text-sm text-blue-500"
+            className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
           >
             Browse All
           </button>
         )}
-
       </div>
 
       <ul className="space-y-1">
         {displayedCategories?.map((category) => (
           <li key={category.id}>
             <button
-              className={`w-full text-left text-sm flex justify-between items-center p-1 ${
+              className={[
+                "w-full text-left text-sm flex justify-between items-center px-2 py-1.5 border transition-colors duration-150",
                 selectedCategory === category.id
-                  ? "font-semibold text-primary"
-                  : "text-gray-700"
-              }`}
+                  ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black font-medium"
+                  : "border-transparent text-gray-700 dark:text-gray-300 hover:border-black dark:hover:border-gray-500 hover:text-black dark:hover:text-white",
+              ].join(" ")}
               onClick={() =>
-                setSelectedCategory(
-                  selectedCategory === category.id ? null : category.id
-                )
+                setSelectedCategory(selectedCategory === category.id ? null : category.id)
               }
             >
-              <span>
-                {category.name} ({category.products_count})
-              </span>
+              <span>{category.name}</span>
+              <span className="text-xs opacity-60">({category.products_count})</span>
             </button>
           </li>
         ))}
       </ul>
+
       {selectedCategory && (
-        <div className="mt-3 pt-2 border-t border-gray-100">
+        <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-800">
           <button
             onClick={() => setSelectedCategory(null)}
-            className="w-full text-left text-sm text-blue-500 font-medium p-1 hover:bg-gray-50 rounded"
+            className="w-full text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white px-2 py-1 transition-colors"
           >
             Show All Products
           </button>

@@ -1,7 +1,4 @@
 import InputError from "@/Components/Core/InputError";
-import InputLabel from "@/Components/Core/InputLabel";
-import PrimaryButton from "@/Components/Core/PrimaryButton";
-import TextInput from "@/Components/Core/TextInput";
 import { Transition } from "@headlessui/react";
 import { useForm } from "@inertiajs/react";
 import { FormEventHandler, useRef } from "react";
@@ -23,7 +20,6 @@ export default function UpdatePasswordForm({
 
   const updatePassword: FormEventHandler = (e) => {
     e.preventDefault();
-
     put(route("password.update"), {
       preserveScroll: true,
       onSuccess: () => reset(),
@@ -32,7 +28,6 @@ export default function UpdatePasswordForm({
           reset("password", "password_confirmation");
           passwordInput.current?.focus();
         }
-
         if (errors.current_password) {
           reset("current_password");
           currentPasswordInput.current?.focus();
@@ -43,69 +38,74 @@ export default function UpdatePasswordForm({
 
   return (
     <section className={className}>
-      <header>
-        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-          Update Password
-        </h2>
-
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Ensure your account is using a long, random password to stay secure.
-        </p>
-      </header>
-
-      <form onSubmit={updatePassword} className="mt-6 space-y-6">
+      <form onSubmit={updatePassword} className="space-y-6">
         <div>
-          <InputLabel htmlFor="current_password" value="Current Password" />
-
-          <TextInput
+          <label
+            htmlFor="current_password"
+            className="mb-2 block text-xs font-bold uppercase tracking-widest text-black dark:text-white"
+          >
+            Current Password
+          </label>
+          <input
             id="current_password"
             ref={currentPasswordInput}
+            type="password"
             value={data.current_password}
             onChange={(e) => setData("current_password", e.target.value)}
-            type="password"
-            className="mt-1 block w-full"
             autoComplete="current-password"
+            className="w-full bg-white dark:bg-gray-950 border border-black dark:border-gray-600 px-4 py-3 text-sm text-black dark:text-white outline-none focus:ring-0 placeholder-gray-400 dark:placeholder-gray-600"
+            placeholder="••••••••"
           />
-
           <InputError message={errors.current_password} className="mt-2" />
         </div>
 
         <div>
-          <InputLabel htmlFor="password" value="New Password" />
-
-          <TextInput
+          <label
+            htmlFor="password"
+            className="mb-2 block text-xs font-bold uppercase tracking-widest text-black dark:text-white"
+          >
+            New Password
+          </label>
+          <input
             id="password"
             ref={passwordInput}
+            type="password"
             value={data.password}
             onChange={(e) => setData("password", e.target.value)}
-            type="password"
-            className="mt-1 block w-full"
             autoComplete="new-password"
+            className="w-full bg-white dark:bg-gray-950 border border-black dark:border-gray-600 px-4 py-3 text-sm text-black dark:text-white outline-none focus:ring-0 placeholder-gray-400 dark:placeholder-gray-600"
+            placeholder="••••••••"
           />
-
           <InputError message={errors.password} className="mt-2" />
         </div>
 
         <div>
-          <InputLabel
+          <label
             htmlFor="password_confirmation"
-            value="Confirm Password"
-          />
-
-          <TextInput
+            className="mb-2 block text-xs font-bold uppercase tracking-widest text-black dark:text-white"
+          >
+            Confirm Password
+          </label>
+          <input
             id="password_confirmation"
+            type="password"
             value={data.password_confirmation}
             onChange={(e) => setData("password_confirmation", e.target.value)}
-            type="password"
-            className="mt-1 block w-full"
             autoComplete="new-password"
+            className="w-full bg-white dark:bg-gray-950 border border-black dark:border-gray-600 px-4 py-3 text-sm text-black dark:text-white outline-none focus:ring-0 placeholder-gray-400 dark:placeholder-gray-600"
+            placeholder="••••••••"
           />
-
           <InputError message={errors.password_confirmation} className="mt-2" />
         </div>
 
         <div className="flex items-center gap-4">
-          <PrimaryButton disabled={processing}>Save</PrimaryButton>
+          <button
+            type="submit"
+            disabled={processing}
+            className="border border-black dark:border-white bg-black dark:bg-white px-8 py-3 text-xs font-bold uppercase tracking-widest text-white dark:text-black transition-all duration-200 hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white disabled:opacity-50"
+          >
+            {processing ? "Saving..." : "Update Password"}
+          </button>
 
           <Transition
             show={recentlySuccessful}
@@ -114,7 +114,9 @@ export default function UpdatePasswordForm({
             leave="transition ease-in-out"
             leaveTo="opacity-0"
           >
-            <p className="text-sm text-gray-600 dark:text-gray-400">Saved.</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+              Saved.
+            </p>
           </Transition>
         </div>
       </form>

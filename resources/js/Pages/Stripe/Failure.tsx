@@ -1,49 +1,64 @@
-import PrimaryButton from "@/Components/Core/PrimaryButton";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { XCircleIcon } from "@heroicons/react/24/outline";
+import AppLayout from "@/Layouts/AppLayout";
+import { XCircle } from "lucide-react";
 import { Head, Link } from "@inertiajs/react";
 
 export default function Failure() {
   return (
-    <AuthenticatedLayout>
+    <AppLayout>
       <Head title="Payment Failed" />
 
-      <div className="w-[480px] mx-auto py-12">
-        <div className="flex flex-col items-center">
-          <div className="text-red-600">
-            <XCircleIcon className="size-24" />
+      <div className="min-h-[70vh] bg-white dark:bg-gray-950 px-4 py-16 md:px-8 lg:px-16">
+
+        {/* Header */}
+        <div className="mb-12 flex flex-col items-center text-center">
+          <div className="mb-6 flex h-16 w-16 items-center justify-center border border-black dark:border-white bg-white dark:bg-gray-900 text-black dark:text-white">
+            <XCircle className="h-8 w-8" />
           </div>
-          <div className="text-3xl font-semibold mt-4">Payment Failed</div>
-          <p className="text-gray-600 mt-2 text-center">
-            Something went wrong during your payment process. Your payment was
-            not completed.
+          <h1 className="text-4xl font-black uppercase tracking-tighter text-black dark:text-white">
+            Payment Failed
+          </h1>
+          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+            Something went wrong during your payment. Your card was not charged.
           </p>
         </div>
 
-        <div className="mt-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">What you can do</h2>
-          <ul className="list-disc pl-5 space-y-2 text-gray-700 dark:text-gray-300">
-            <li>Ensure your card details are correct.</li>
-            <li>Try using a different payment method.</li>
-            <li>Contact your bank if the issue persists.</li>
+        {/* What to do */}
+        <div className="mx-auto max-w-md border border-black dark:border-gray-700 bg-white dark:bg-gray-900 p-8">
+          <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-black dark:text-white">
+            What you can do
+          </h2>
+
+          <ul className="space-y-3 mb-8">
+            {[
+              "Ensure your card details are correct.",
+              "Try using a different payment method.",
+              "Contact your bank if the issue persists.",
+            ].map((item, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
+                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center border border-black dark:border-white bg-black dark:bg-white text-white dark:text-black text-[10px] font-bold">
+                  {i + 1}
+                </span>
+                {item}
+              </li>
+            ))}
           </ul>
 
-          <div className="flex justify-between mt-6">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <Link
-              href={route("shop")}
-              className="btn bg-purple-800 hover:bg-purple-700 text-white rounded-full"
+              href={route("cart.index")}
+              className="flex-1 border border-black dark:border-white bg-black dark:bg-white px-6 py-3 text-center text-xs font-bold uppercase tracking-widest text-white dark:text-black transition-all duration-200 hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white"
             >
-              Back to Shop
+              Try Again
             </Link>
             <Link
               href={route("dashboard")}
-              className="btn btn-outline rounded-full"
+              className="flex-1 border border-black dark:border-white px-6 py-3 text-center text-xs font-bold uppercase tracking-widest text-black dark:text-white transition-all duration-200 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black"
             >
-              Go to Dashboard
+              Go Home
             </Link>
           </div>
         </div>
       </div>
-    </AuthenticatedLayout>
+    </AppLayout>
   );
 }

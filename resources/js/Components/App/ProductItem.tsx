@@ -30,12 +30,12 @@ function ProductItem({ product }: { product: Product }) {
 
   return (
     <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden group relative">
-      <figure className="relative group aspect-[4/3] w-full overflow-hidden">
+      <figure className="relative group aspect-[4/3] w-full overflow-hidden bg-gray-50">
         <Link href={route("product.show", product.slug)}>
           <img
             src={product.image}
             alt={product.title}
-            className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         </Link>
         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

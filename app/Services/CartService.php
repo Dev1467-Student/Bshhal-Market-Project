@@ -140,7 +140,7 @@ class CartService implements CartInterface
                         'option_ids' => $cartItem['option_ids'],
                         'options' => $optionInfo,
                         'image' => $imageUrl ?: $product->getFirstMediaUrl('images', 'small'),
-                        'users' => [
+                        'user' => [
                             'id' => $product->created_by,
                             'name' => $product->user->vendor->store_name,
                         ]
@@ -288,9 +288,9 @@ class CartService implements CartInterface
         $cartItems = $this->getCartItems();
 
         $data = collect($cartItems)
-            ->groupBy(fn($item) => $item['users']['id'])
+            ->groupBy(fn($item) => $item['user']['id'])
             ->map(fn($items, $userId) => [
-                'user' => $items->first()['users'],
+                'user' => $items->first()['user'],
                 'items' => $items->toArray(),
                 'totalQuantity' => $items->sum('quantity'),
                 'totalPrice' => $items->sum(fn($item) => ($item['price'] * $item['quantity']))

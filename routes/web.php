@@ -1,5 +1,5 @@
 <?php
-
+use Inertia\Inertia;
 use App\Enum\RolesEnum;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
@@ -8,7 +8,22 @@ use App\Http\Controllers\PublicController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
+// FALLBACK ROUTE FOR STORAGE FILES - MUST BE FIRST!
+Route::get('/storage/{path}', function (string $path) {
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
+    $file = Storage::disk('public')->path($path);
+    $mimeType = Storage::disk('public')->mimeType($path);
+
+    return response()->file($file, [
+        'Content-Type' => $mimeType,
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*')->name('storage.file');
 
 /* ------ Guest Routes ---------------- */
 
@@ -82,3 +97,46 @@ Route::middleware('auth')->group(function () {
 /* ----------------------------------------- */
 
 require __DIR__ . '/auth.php';
+
+// Testing the success and failure pages of the payment process
+
+// Route::get('/test-success', function() {
+//     return Inertia::render('Stripe/Success', [
+//         'orders' => []
+//     ]);
+// });
+
+// Route::get('/test-failure', function() {
+//     return Inertia::render('Stripe/Failure', [
+//         'orders' => []
+//     ]);
+// });
+
+// Testing the RestPassword, VerifyEmail and ConfirmPassword pages :
+
+Route::get('/test-reset', function () {
+    return Inertia::render('Auth/ResetPassword', [
+        'token' => 'test-token',
+        'email' => 'test@example.com',
+    ]);
+});
+
+Route::get('/test-verify', function () {
+    return Inertia::render('Auth/VerifyEmail', [
+        'status' => null,
+    ]);
+});
+
+Route::get('/test-confirm', function () {
+    return Inertia::render('Auth/ConfirmPassword');
+});
+
+// Fallback route to serve storage files if symlink fails (great for deployment)
+Route::get('/storage/{path}', function (string $path) {
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
+    return response()->file(Storage::disk('public')->path($path));
+})->where('path', '.*');
+
